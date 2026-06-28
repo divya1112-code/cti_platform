@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CyberShield — Analysis Result</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0d17;--bg2:#171428;--bg3:#1e1a35;--bg4:#261f42;--gold:#f5c842;--gold2:rgba(245,200,66,0.14);--gold3:rgba(245,200,66,0.06);--violet:#9b6dff;--violet2:rgba(155,109,255,0.14);--green:#22d3a5;--green2:rgba(34,211,165,0.12);--red:#ff6b6b;--red2:rgba(255,107,107,0.12);--rose:#f472b6;--rose2:rgba(244,114,182,0.14);--border:rgba(155,109,255,0.18);--border2:rgba(245,200,66,0.25);--text:#f0ecff;--text2:#b8afd4;--text3:#6b5f8a;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--violet),var(--rose),var(--gold));background-size:300%;z-index:9999;animation:tb 4s linear infinite}
+@keyframes tb{0%{background-position:0%}100%{background-position:300%}}
+.sidebar{width:240px;min-height:100vh;background:linear-gradient(180deg,#1a1430,#0f0d17);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.sl{padding:22px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.li{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--violet));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ln{font-size:1rem;font-weight:700;background:linear-gradient(90deg,var(--gold),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lt{font-size:0.58rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.ss{padding:16px 16px 6px;font-size:0.58rem;font-weight:700;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;opacity:0.7}
+.nl{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin:2px 8px;color:var(--text3);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.22s;text-decoration:none;position:relative}
+.nl:hover{background:var(--bg3);color:var(--text2)}
+.nl.a{background:linear-gradient(90deg,rgba(245,200,66,0.12),rgba(155,109,255,0.08));color:var(--gold);border:1px solid rgba(245,200,66,0.2)}
+.nl.a::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;border-radius:0 2px 2px 0;background:linear-gradient(180deg,var(--gold),var(--violet))}
+.ni{width:20px;text-align:center;font-size:1rem;flex-shrink:0}
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column}
+.topbar{height:62px;background:rgba(15,13,23,0.96);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(16px)}
+.clk{font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--gold);padding:5px 12px;border-radius:6px;background:var(--gold3);border:1px solid rgba(245,200,66,0.18)}
+.done-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--green2);border:1px solid rgba(34,211,165,0.2);font-size:0.68rem;color:var(--green)}
+.ddot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.btn-sm{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.btn-sm:hover{background:var(--bg4);color:var(--text)}
+.page{padding:20px 26px 40px}
+.ioc-hero{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:12px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.ih-lbl{font-size:0.62rem;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.ih-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--gold)}
+.ibadge{padding:5px 14px;border-radius:20px;font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.ib-ip{background:var(--gold2);color:var(--gold);border:1px solid rgba(245,200,66,0.25)}
+.ib-do{background:var(--violet2);color:var(--violet);border:1px solid rgba(155,109,255,0.25)}
+.ib-ha{background:var(--rose2);color:var(--rose);border:1px solid rgba(244,114,182,0.25)}
+.ib-ur{background:var(--green2);color:var(--green);border:1px solid rgba(34,211,165,0.25)}
+.rg{display:grid;grid-template-columns:1fr 370px;gap:16px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color 0.2s}
+.card:hover{border-color:var(--border2)}
+.ct{font-size:0.75rem;font-weight:600;color:var(--text2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+.ctd{width:7px;height:7px;border-radius:50%}
+.srow{margin-bottom:16px}
+.srh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.sn{font-size:0.8rem;font-weight:500;color:var(--text2)}
+.sv{font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600}
+.strack{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.sfill{height:100%;border-radius:3px;animation:grow 1.2s cubic-bezier(0.4,0,0.2,1) forwards;position:relative;overflow:hidden}
+.sfill::after{content:'';position:absolute;top:0;left:-200%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);animation:sw 2s ease .5s infinite}
+@keyframes grow{from{width:0}to{width:var(--p)}}
+@keyframes sw{from{left:-200%}to{left:200%}}
+.sf-g{background:linear-gradient(90deg,#f5c842,#f59e0b)}
+.sf-v{background:linear-gradient(90deg,#9b6dff,#7c3aed)}
+.sf-r{background:linear-gradient(90deg,#f472b6,#db2777)}
+.fbox{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:14px}
+.flbl{font-size:0.62rem;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.ftext{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--gold)}
+.sc-section{text-align:center;padding:8px 0 16px}
+.sc-wrap{position:relative;width:140px;height:140px;margin:0 auto 12px}
+.sc-wrap svg{width:140px;height:140px;transform:rotate(-90deg)}
+.sc-track{fill:none;stroke:var(--bg4);stroke-width:10}
+.sc-fill{fill:none;stroke-width:10;stroke-linecap:round;stroke-dasharray:376.99;stroke-dashoffset:376.99;transition:stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1)}
+.sc-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sc-num{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1}
+.sc-max{font-size:0.62rem;color:var(--text3);margin-top:2px}
+.verd{border-radius:10px;padding:20px;text-align:center;margin-bottom:14px}
+.v-high{background:var(--red2);border:1px solid rgba(255,107,107,0.25)}
+.v-med{background:var(--gold2);border:1px solid rgba(245,200,66,0.25)}
+.v-low{background:var(--green2);border:1px solid rgba(34,211,165,0.25)}
+.v-ico{font-size:1.8rem;display:block;margin-bottom:6px}
+.v-title{font-size:1rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.v-desc{font-size:0.72rem;color:var(--text2)}
+.mini-sc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.ms-card{text-align:center;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px}
+.ms-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;margin-bottom:3px}
+.ms-lbl{font-size:0.6rem;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--violet));border-radius:3px}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sl"><div class="li">🛡️</div><div><div class="ln">CyberShield</div><div class="lt">Threat Intelligence</div></div></div>
+    <div class="ss">Navigation</div>
+    <a href="/" class="nl"><span class="ni">📊</span>Dashboard</a>
+    <a href="/analyze_page" class="nl a"><span class="ni">🔍</span>IOC Analyzer</a>
+    <a href="/qr_page" class="nl"><span class="ni">📷</span>QR Scanner</a>
+    <a href="/history" class="nl"><span class="ni">🕐</span>Scan History</a>
+    <a href="#" class="nl"><span class="ni">📄</span>Reports</a>
+    <a href="#" class="nl"><span class="ni">⚙️</span>Settings</a>
+</aside>
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:0.95rem;font-weight:600;color:var(--text)">🔍 Analysis Result</span>
+            <div class="done-pill"><div class="ddot"></div>Complete</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <a href="/" class="btn-sm">← Dashboard</a>
+            <a href="/history" class="btn-sm">📋 History</a>
+            <div class="clk" id="clk">00:00:00</div>
+        </div>
+    </header>
+    <div class="page">
+        <div class="ioc-hero">
+            <div><div class="ih-lbl">Analyzed Indicator of Compromise</div><div class="ih-val">{{ ioc }}</div></div>
+            <div style="text-align:right">
+                <div style="font-size:0.62rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">IOC Type</div>
+                {% if ioc_type=="ip" %}<span class="ibadge ib-ip">IP Address</span>
+                {% elif ioc_type=="domain" %}<span class="ibadge ib-do">Domain</span>
+                {% elif ioc_type=="hash" %}<span class="ibadge ib-ha">File Hash</span>
+                {% else %}<span class="ibadge ib-ur">URL</span>{% endif %}
+            </div>
+        </div>
+        <div class="rg">
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="card">
+                    <div class="ct"><div class="ctd" style="background:var(--gold)"></div>Intelligence Scores</div>
+                    <div class="srow"><div class="srh"><span class="sn">🌐 VirusTotal</span><span class="sv" style="color:var(--gold)">{{ vt_score }}/100</span></div><div class="strack"><div class="sfill sf-g" style="--p:{{ vt_score }}%"></div></div></div>
+                    <div class="srow"><div class="srh"><span class="sn">🚨 AbuseIPDB</span><span class="sv" style="color:var(--violet)">{{ abuse_score }}/100</span></div><div class="strack"><div class="sfill sf-v" style="--p:{{ abuse_score }}%"></div></div></div>
+                    <div class="srow"><div class="srh"><span class="sn">👁️ AlienVault OTX</span><span class="sv" style="color:var(--rose)">{{ otx_score }}/100</span></div><div class="strack"><div class="sfill sf-r" style="--p:{{ otx_score }}%"></div></div></div>
+                    <div class="fbox"><div class="flbl">Scoring Formula</div>
+                    {% if ioc_type=="ip" %}<div class="ftext">(VT×0.4) + (Abuse×0.3) + (OTX×0.3) = {{ final_score }}</div>
+                    {% else %}<div class="ftext">(VT×0.6) + (OTX×0.4) = {{ final_score }}</div>{% endif %}</div>
+                </div>
+                <div class="card"><div class="ct"><div class="ctd" style="background:var(--violet)"></div>Threat Radar</div><canvas id="rc" height="220"></canvas></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="card">
+                    <div class="ct"><div class="ctd" style="background:var(--gold)"></div>Risk Assessment</div>
+                    <div class="sc-section">
+                        <div class="sc-wrap">
+                            <svg viewBox="0 0 120 120"><circle class="sc-track" cx="60" cy="60" r="50"/><circle class="sc-fill" id="sc-fill" cx="60" cy="60" r="50" stroke="{% if final_score>=71 %}#ff6b6b{% elif final_score>=31 %}#f5c842{% else %}#22d3a5{% endif %}"/></svg>
+                            <div class="sc-center"><div class="sc-num" id="sc-num" style="color:{% if final_score>=71 %}#ff6b6b{% elif final_score>=31 %}#f5c842{% else %}#22d3a5{% endif %}">0</div><div class="sc-max">/ 100</div></div>
+                        </div>
+                    </div>
+                    {% if color=="danger" %}<div class="verd v-high"><span class="v-ico">⚠️</span><div class="v-title" style="color:#ff6b6b">High Risk — Malicious</div><div class="v-desc">Immediate action required. Block this IOC.</div></div>
+                    {% elif color=="warning" %}<div class="verd v-med"><span class="v-ico">⚡</span><div class="v-title" style="color:#f5c842">Medium Risk — Suspicious</div><div class="v-desc">Monitor closely. Proceed with caution.</div></div>
+                    {% else %}<div class="verd v-low"><span class="v-ico">✅</span><div class="v-title" style="color:#22d3a5">Low Risk — Safe</div><div class="v-desc">No significant threats detected.</div></div>{% endif %}
+                    <div class="mini-sc">
+                        <div class="ms-card"><div class="ms-val" style="color:var(--gold)">{{ vt_score }}</div><div class="ms-lbl">VirusTotal</div></div>
+                        <div class="ms-card"><div class="ms-val" style="color:var(--violet)">{{ abuse_score }}</div><div class="ms-lbl">AbuseIPDB</div></div>
+                        <div class="ms-card"><div class="ms-val" style="color:var(--rose)">{{ otx_score }}</div><div class="ms-lbl">OTX</div></div>
+                    </div>
+                    <div class="acts">
+                        <a href="/" class="btn-sm">← New Scan</a>
+                        <a href="/history" class="btn-sm">📋 History</a>
+                        <form action="/download_report" method="POST" style="display:inline">
+                            <input type="hidden" name="ioc" value="{{ ioc }}"><input type="hidden" name="ioc_type" value="{{ ioc_type }}"><input type="hidden" name="vt_score" value="{{ vt_score }}"><input type="hidden" name="abuse_score" value="{{ abuse_score }}"><input type="hidden" name="otx_score" value="{{ otx_score }}"><input type="hidden" name="final_score" value="{{ final_score }}"><input type="hidden" name="verdict" value="{{ verdict }}">
+                            <button type="submit" class="btn-sm">⬇ Report</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function tick(){document.getElementById('clk').textContent=new Date().toTimeString().slice(0,8);}
+setInterval(tick,1000);tick();
+const fs={{ final_score }};
+setTimeout(()=>{document.getElementById('sc-fill').style.strokeDashoffset=376.99-(fs/100)*376.99;},100);
+let c=0;const t=setInterval(()=>{c=Math.min(c+2,fs);document.getElementById('sc-num').textContent=c;if(c>=fs)clearInterval(t);},25);
+new Chart(document.getElementById('rc').getContext('2d'),{type:'radar',data:{labels:['VirusTotal','AbuseIPDB','OTX','Final Score','Threat Level'],datasets:[{data:[{{ vt_score }},{{ abuse_score }},{{ otx_score }},{{ final_score }},{{ final_score }}],backgroundColor:'rgba(155,109,255,0.15)',borderColor:'#9b6dff',borderWidth:2,pointBackgroundColor:'#f5c842',pointBorderColor:'#f5c842',pointRadius:4}]},options:{responsive:true,scales:{r:{min:0,max:100,grid:{color:'rgba(255,255,255,0.04)'},angleLines:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b5f8a',backdropColor:'transparent',font:{size:9}},pointLabels:{color:'#b8afd4',font:{size:10,family:'Inter'}}}},plugins:{legend:{display:false},tooltip:{backgroundColor:'#171428',borderColor:'rgba(245,200,66,0.2)',borderWidth:1,titleColor:'#f0ecff',bodyColor:'#b8afd4'}},animation:{duration:1500}}});
+</script>
+</body>
+</html>

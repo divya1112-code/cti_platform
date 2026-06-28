@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+cti_database.db
+uploads/
+*.pdf
+.env

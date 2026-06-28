@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CyberShield — QR Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0d17;--bg2:#171428;--bg3:#1e1a35;--bg4:#261f42;--gold:#f5c842;--gold2:rgba(245,200,66,0.14);--gold3:rgba(245,200,66,0.06);--violet:#9b6dff;--violet2:rgba(155,109,255,0.14);--violet3:rgba(155,109,255,0.06);--green:#22d3a5;--green2:rgba(34,211,165,0.12);--rose:#f472b6;--border:rgba(155,109,255,0.18);--border2:rgba(245,200,66,0.25);--text:#f0ecff;--text2:#b8afd4;--text3:#6b5f8a;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--violet),var(--rose),var(--gold));background-size:300%;z-index:9999;animation:tb 4s linear infinite}
+@keyframes tb{0%{background-position:0%}100%{background-position:300%}}
+.sidebar{width:240px;min-height:100vh;background:linear-gradient(180deg,#1a1430,#0f0d17);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.sl{padding:22px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.li{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--violet));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ln{font-size:1rem;font-weight:700;background:linear-gradient(90deg,var(--gold),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lt{font-size:0.58rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.ss{padding:16px 16px 6px;font-size:0.58rem;font-weight:700;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;opacity:0.7}
+.nl{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin:2px 8px;color:var(--text3);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.22s;text-decoration:none;position:relative}
+.nl:hover{background:var(--bg3);color:var(--text2)}
+.nl.a{background:linear-gradient(90deg,rgba(245,200,66,0.12),rgba(155,109,255,0.08));color:var(--gold);border:1px solid rgba(245,200,66,0.2)}
+.nl.a::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;border-radius:0 2px 2px 0;background:linear-gradient(180deg,var(--gold),var(--violet))}
+.ni{width:20px;text-align:center;font-size:1rem;flex-shrink:0}
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column}
+.topbar{height:62px;background:rgba(15,13,23,0.96);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(16px)}
+.clk{font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--gold);padding:5px 12px;border-radius:6px;background:var(--gold3);border:1px solid rgba(245,200,66,0.18)}
+.page{padding:24px 26px 40px;max-width:700px}
+.pt{font-size:1.2rem;font-weight:700;margin-bottom:4px}
+.ps{font-size:0.78rem;color:var(--text2);margin-bottom:24px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.ct{font-size:0.76rem;font-weight:600;color:var(--text2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+.ctd{width:7px;height:7px;border-radius:50%}
+.upload-zone{border:2px dashed rgba(155,109,255,0.3);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--violet3);position:relative;margin-bottom:14px}
+.upload-zone:hover{border-color:var(--violet);background:rgba(155,109,255,0.1)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.up-icon{font-size:2.5rem;margin-bottom:10px}
+.up-title{font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.up-sub{font-size:0.72rem;color:var(--text3)}
+.btn-scan{width:100%;padding:13px;border-radius:8px;border:1px solid rgba(155,109,255,0.3);background:linear-gradient(135deg,rgba(155,109,255,0.12),rgba(245,200,66,0.08));color:var(--violet);font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.25s}
+.btn-scan:hover{background:linear-gradient(135deg,rgba(155,109,255,0.2),rgba(245,200,66,0.12));box-shadow:0 0 20px rgba(155,109,255,0.2);color:#fff;transform:translateY(-1px)}
+.preview-area{display:none;text-align:center;margin:14px 0}
+.preview-area img{max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--border)}
+.preview-name{font-size:0.72rem;color:var(--text3);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px}
+.step-num{font-size:1.2rem;flex-shrink:0}
+.step-title{font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:3px}
+.step-desc{font-size:0.7rem;color:var(--text2);line-height:1.5}
+.btn-sm{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;margin-bottom:16px}
+.btn-sm:hover{background:var(--bg4);color:var(--text)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--violet));border-radius:3px}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sl"><div class="li">🛡️</div><div><div class="ln">CyberShield</div><div class="lt">Threat Intelligence</div></div></div>
+    <div class="ss">Navigation</div>
+    <a href="/" class="nl"><span class="ni">📊</span>Dashboard</a>
+    <a href="/analyze_page" class="nl"><span class="ni">🔍</span>IOC Analyzer</a>
+    <a href="/qr_page" class="nl a"><span class="ni">📷</span>QR Scanner</a>
+    <a href="/history" class="nl"><span class="ni">🕐</span>Scan History</a>
+    <a href="#" class="nl"><span class="ni">📄</span>Reports</a>
+    <a href="#" class="nl"><span class="ni">⚙️</span>Settings</a>
+</aside>
+<div class="main">
+    <header class="topbar">
+        <span style="font-size:0.95rem;font-weight:600;color:var(--text)">📷 QR Code Scanner</span>
+        <div class="clk" id="clk">00:00:00</div>
+    </header>
+    <div class="page">
+        <a href="/" class="btn-sm">← Back to Dashboard</a>
+        <div class="pt">QR Code Scanner</div>
+        <div class="ps">Upload a QR code image to automatically extract and analyze the embedded IOC</div>
+        <div class="card">
+            <div class="ct"><div class="ctd" style="background:var(--violet)"></div>Upload QR Code</div>
+            <form action="/scan_qr" method="POST" enctype="multipart/form-data">
+                <div class="upload-zone" id="dropZone">
+                    <input type="file" name="qr_image" accept="image/*" required id="fileInput" onchange="previewFile(this)">
+                    <div class="up-icon">📂</div>
+                    <div class="up-title">Drop QR code image here</div>
+                    <div class="up-sub">or click to browse — PNG, JPG, GIF supported</div>
+                </div>
+                <div class="preview-area" id="previewArea">
+                    <img id="previewImg" src="" alt="Preview">
+                    <div class="preview-name" id="previewName"></div>
+                </div>
+                <button type="submit" class="btn-scan">▶ Scan & Analyze QR Code</button>
+            </form>
+        </div>
+        <div class="card">
+            <div class="ct"><div class="ctd" style="background:var(--gold)"></div>How QR Scanner Works</div>
+            <div class="steps">
+                <div class="step"><div class="step-num">1️⃣</div><div><div class="step-title">Upload QR Code Image</div><div class="step-desc">Take a screenshot or photo of any suspicious QR code you received</div></div></div>
+                <div class="step"><div class="step-num">2️⃣</div><div><div class="step-title">Automatic IOC Extraction</div><div class="step-desc">Platform decodes QR and extracts the embedded URL or domain</div></div></div>
+                <div class="step"><div class="step-num">3️⃣</div><div><div class="step-title">Threat Analysis</div><div class="step-desc">Extracted IOC is analyzed against VirusTotal, AbuseIPDB and OTX</div></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function tick(){document.getElementById('clk').textContent=new Date().toTimeString().slice(0,8);}
+setInterval(tick,1000);tick();
+function previewFile(input){if(input.files&&input.files[0]){const reader=new FileReader();reader.onload=function(e){document.getElementById('previewImg').src=e.target.result;document.getElementById('previewName').textContent=input.files[0].name;document.getElementById('previewArea').style.display='block';};reader.readAsDataURL(input.files[0]);}}
+</script>
+</body>
+</html>

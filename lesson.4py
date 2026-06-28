@@ -1,0 +1,5 @@
+import requests
+API_KEY = "244ba6220f712425ab884832cf3c717fca35236878361fdc138d4f54c446e69f385a203c96358445"
+ip = input("Enter an IP address: ")
+url = https://api.abuseipdb.com/api/v2/check"
+headrs = {

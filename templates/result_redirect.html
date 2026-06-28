@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Scanned</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-dark">
+    <div class="container">
+        <a class="navbar-brand">🛡️ CTI Platform</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="search-card text-center">
+                <h4 style="color:#00d4ff">🔍 QR Code Scanned!</h4>
+                <p style="color:#888">Extracted IOC from QR Code:</p>
+                <h5 style="color:white" class="mb-4">{{ ioc }}</h5>
+                <form action="/analyze" method="POST">
+                    <input type="hidden" name="ioc" value="{{ ioc }}">
+                    <button type="submit" class="btn-analyze">
+                        Analyze This IOC
+                    </button>
+                </form>
+                <a href="/" class="btn btn-outline-light mt-3">
+                    Scan Another QR
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

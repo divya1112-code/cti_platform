@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CyberShield — CTI Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0f0d17;--bg2:#171428;--bg3:#1e1a35;--bg4:#261f42;
+--gold:#f5c842;--gold2:rgba(245,200,66,0.14);--gold3:rgba(245,200,66,0.06);
+--violet:#9b6dff;--violet2:rgba(155,109,255,0.14);--violet3:rgba(155,109,255,0.06);
+--rose:#f472b6;--rose2:rgba(244,114,182,0.14);
+--green:#22d3a5;--green2:rgba(34,211,165,0.12);
+--red:#ff6b6b;--red2:rgba(255,107,107,0.12);
+--amber:#fbbf24;--amber2:rgba(251,191,36,0.12);
+--border:rgba(155,109,255,0.18);--border2:rgba(245,200,66,0.25);
+--text:#f0ecff;--text2:#b8afd4;--text3:#6b5f8a;
+--sidebar:240px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+
+/* ANIMATED TOP BORDER */
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--violet),var(--rose),var(--gold));background-size:300%;z-index:9999;animation:topbar 4s linear infinite}
+@keyframes topbar{0%{background-position:0%}100%{background-position:300%}}
+
+/* SUBTLE GRID */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(155,109,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(155,109,255,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);min-height:100vh;background:linear-gradient(180deg,#1a1430 0%,#0f0d17 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100;box-shadow:4px 0 20px rgba(0,0,0,0.4)}
+
+.logo-section{padding:22px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.logo-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--violet));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(245,200,66,0.35),0 0 40px rgba(155,109,255,0.2);flex-shrink:0;animation:logo-pulse 3s ease infinite}
+@keyframes logo-pulse{0%,100%{box-shadow:0 0 20px rgba(245,200,66,0.35)}50%{box-shadow:0 0 35px rgba(245,200,66,0.6),0 0 60px rgba(155,109,255,0.3)}}
+.logo-name{font-size:1rem;font-weight:700;background:linear-gradient(90deg,var(--gold),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.3px}
+.logo-tagline{font-size:0.58rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+
+.nav-section-label{padding:16px 16px 6px;font-size:0.58rem;font-weight:700;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;opacity:0.7}
+
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin:2px 8px;color:var(--text3);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.22s;text-decoration:none;position:relative;overflow:hidden}
+.nav-link:hover{background:var(--bg3);color:var(--text2)}
+.nav-link.active{background:linear-gradient(90deg,rgba(245,200,66,0.12),rgba(155,109,255,0.08));color:var(--gold);border:1px solid rgba(245,200,66,0.2)}
+.nav-link.active::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;border-radius:0 2px 2px 0;background:linear-gradient(180deg,var(--gold),var(--violet))}
+.nav-icon{width:20px;text-align:center;font-size:1rem;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:0.58rem;font-weight:700;padding:2px 6px;border-radius:10px}
+
+.integrations-box{margin:8px;padding:14px;background:linear-gradient(135deg,rgba(245,200,66,0.04),rgba(155,109,255,0.04));border-radius:10px;border:1px solid var(--border)}
+.int-title{font-size:0.58rem;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.int-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.int-item:last-child{border-bottom:none}
+.int-name{font-size:0.74rem;color:var(--text2)}
+.int-pill{background:var(--green2);color:var(--green);border:1px solid rgba(34,211,165,0.2);font-size:0.58rem;font-weight:600;padding:2px 8px;border-radius:10px}
+
+.upgrade-card{margin:8px;padding:16px;background:linear-gradient(135deg,rgba(245,200,66,0.1),rgba(155,109,255,0.12));border:1px solid rgba(245,200,66,0.22);border-radius:10px;margin-top:auto}
+.up-title{font-size:0.85rem;font-weight:700;color:var(--gold);margin-bottom:5px}
+.up-desc{font-size:0.7rem;color:var(--text2);margin-bottom:12px;line-height:1.5}
+.up-btn{width:100%;padding:9px;border-radius:7px;border:none;background:linear-gradient(90deg,var(--gold),var(--violet));color:#0f0d17;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px}
+.up-btn:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 5px 20px rgba(245,200,66,0.4)}
+
+.sidebar-footer{padding:12px 16px;text-align:center;font-size:0.6rem;color:var(--text3);border-top:1px solid var(--border)}
+
+/* MAIN CONTENT */
+.content{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;position:relative;z-index:1}
+
+/* TOPBAR */
+.topbar{height:62px;background:rgba(15,13,23,0.96);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:50;backdrop-filter:blur(16px)}
+
+.search-box{flex:1;max-width:500px;display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 14px;transition:all 0.2s}
+.search-box:focus-within{border-color:rgba(245,200,66,0.4);box-shadow:0 0 0 3px rgba(245,200,66,0.07)}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-size:0.82rem;font-family:'Inter',sans-serif;width:100%}
+.search-box input::placeholder{color:var(--text3)}
+.search-go{background:linear-gradient(90deg,var(--gold),var(--violet));border:none;border-radius:6px;padding:6px 14px;color:#0f0d17;cursor:pointer;font-size:0.78rem;font-weight:700;flex-shrink:0;transition:all 0.2s}
+.search-go:hover{box-shadow:0 0 14px rgba(245,200,66,0.45)}
+
+.topbar-right{display:flex;align-items:center;gap:10px}
+.live-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--green2);border:1px solid rgba(34,211,165,0.2);font-size:0.68rem;color:var(--green);letter-spacing:1px;font-weight:500}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.2s ease infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:0.2;box-shadow:none}}
+.clock{font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--gold);padding:5px 12px;border-radius:6px;background:var(--gold3);border:1px solid rgba(245,200,66,0.18)}
+.tb-icon{width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;position:relative}
+.tb-icon:hover{background:var(--bg4)}
+.notif-badge{position:absolute;top:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;font-size:0.5rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.admin-btn{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer}
+.admin-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--violet));display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;color:#0f0d17}
+.admin-name{font-size:0.78rem;font-weight:600;color:var(--text)}
+.admin-role{font-size:0.6rem;color:var(--text3)}
+
+/* PAGE */
+.page{padding:22px 26px 40px}
+
+.page-welcome{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.welcome-heading{font-size:1.4rem;font-weight:700;color:var(--text)}
+.welcome-sub{font-size:0.78rem;color:var(--text2);margin-top:4px}
+.page-actions{display:flex;gap:10px}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:8px;background:linear-gradient(90deg,var(--gold),var(--violet));border:none;color:#0f0d17;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.25s;text-decoration:none}
+.btn-primary:hover{opacity:0.9;transform:translateY(-2px);box-shadow:0 6px 22px rgba(245,200,66,0.35)}
+.btn-outline{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.2s;text-decoration:none}
+.btn-outline:hover{background:var(--bg4);color:var(--text)}
+
+/* KPI ROW */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:all 0.25s;cursor:default}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--kc,var(--gold)),transparent);opacity:0.7}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.4)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.kpi-label{font-size:0.68rem;font-weight:500;color:var(--text3)}
+.kpi-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1;margin-bottom:6px}
+.kpi-sub{font-size:0.68rem}
+.kpi-spark{margin-top:10px;height:36px}
+.k-gold{--kc:var(--gold)}.k-gold .kpi-value{color:var(--gold)}.k-gold .kpi-ico{background:var(--gold3)}
+.k-red{--kc:var(--red)}.k-red .kpi-value{color:var(--red)}.k-red .kpi-ico{background:var(--red2)}
+.k-violet{--kc:var(--violet)}.k-violet .kpi-value{color:var(--violet)}.k-violet .kpi-ico{background:var(--violet3)}
+.k-green{--kc:var(--green)}.k-green .kpi-value{color:var(--green)}.k-green .kpi-ico{background:var(--green2)}
+.k-rose{--kc:var(--rose)}.k-rose .kpi-value{color:var(--rose)}.k-rose .kpi-ico{background:var(--rose2)}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color 0.2s}
+.card:hover{border-color:var(--border2)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:0.76rem;font-weight:600;color:var(--text2);letter-spacing:0.8px;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.c-dot{width:7px;height:7px;border-radius:50%}
+.card-link{font-size:0.72rem;color:var(--gold);text-decoration:none}
+.card-link:hover{text-decoration:underline}
+
+/* GRIDS */
+.g3{display:grid;grid-template-columns:1fr 1fr 300px;gap:14px;margin-bottom:14px}
+.g3b{display:grid;grid-template-columns:1fr 1fr 300px;gap:14px}
+.api-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+
+/* API CARDS */
+.api-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all 0.2s}
+.api-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.api-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.api-logo{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.api-name{font-size:0.88rem;font-weight:600;color:var(--text)}
+.api-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.api-slabel{font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
+.api-sval{font-family:'JetBrains Mono',monospace;font-size:0.9rem;font-weight:600}
+.api-btn{width:100%;padding:7px;border-radius:6px;border:none;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.api-btn:hover{opacity:0.85;transform:translateY(-1px)}
+
+/* GAUGE */
+.gauge-wrap{text-align:center;padding:6px 0 4px}
+.gauge-rel{position:relative;display:inline-block}
+.gauge-center{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none}
+.gauge-num{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:700;line-height:1}
+.gauge-max{font-size:0.65rem;color:var(--text3)}
+.gauge-verdict{display:inline-block;margin-top:8px;padding:5px 20px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.gauge-desc{font-size:0.7rem;color:var(--text2);margin-top:8px;line-height:1.6}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:9px 12px;text-align:left;font-size:0.6rem;font-weight:600;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg3)}
+.data-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:0.78rem;color:var(--text2);transition:background 0.15s}
+.data-table tr:hover td{background:var(--bg3)}
+.data-table tr:last-child td{border-bottom:none}
+.td-ioc{font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:0.72rem}
+.score-chip{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:20px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;padding:0 5px}
+.risk-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:0.63rem;font-weight:600}
+.rp-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.p-high{background:var(--red2);color:var(--red);border:1px solid rgba(255,107,107,0.2)}
+.p-med{background:var(--amber2);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
+.p-low{background:var(--green2);color:var(--green);border:1px solid rgba(34,211,165,0.2)}
+
+/* ACTIVITY */
+.act{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.act:last-child{border-bottom:none;padding-bottom:0}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.act-title{font-size:0.78rem;font-weight:500;color:var(--text);margin-bottom:2px}
+.act-ioc{font-size:0.68rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.act-time{font-size:0.65rem;color:var(--text3);flex-shrink:0;margin-top:3px}
+
+/* DONUT */
+.donut-wrap{position:relative;width:165px;height:165px;margin:0 auto}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-num{font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:var(--gold);line-height:1}
+.donut-lbl{font-size:0.6rem;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase}
+.legend{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;justify-content:space-between;font-size:0.75rem}
+.legend-left{display:flex;align-items:center;gap:7px;color:var(--text2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-val{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:600}
+.legend-pct{font-size:0.63rem;color:var(--text3)}
+
+/* STATUS */
+.status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.status-row:last-child{border-bottom:none}
+.status-name{font-size:0.78rem;color:var(--text2);display:flex;align-items:center;gap:7px}
+.status-ok{background:var(--green2);color:var(--green);border:1px solid rgba(34,211,165,0.2);font-size:0.6rem;font-weight:600;padding:2px 8px;border-radius:10px}
+
+/* QUICK ACTIONS */
+.qa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;text-decoration:none;transition:all 0.2s;margin-bottom:8px}
+.qa-item:last-child{margin-bottom:0}
+.qa-item:hover{border-color:rgba(245,200,66,0.3);background:var(--bg4)}
+.qa-icon{font-size:1.1rem;flex-shrink:0}
+.qa-title{font-size:0.78rem;font-weight:500;color:var(--text)}
+.qa-sub{font-size:0.63rem;color:var(--text3);margin-top:1px}
+
+.page-footer{text-align:center;padding:14px;font-size:0.62rem;color:var(--text3);border-top:1px solid var(--border)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp 0.5s ease forwards;opacity:0}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--violet));border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo-section">
+        <div class="logo-icon">🛡️</div>
+        <div>
+            <div class="logo-name">CyberShield</div>
+            <div class="logo-tagline">Threat Intelligence</div>
+        </div>
+    </div>
+    <div class="nav-section-label">Navigation</div>
+    <a href="/" class="nav-link active"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="/analyze_page" class="nav-link"><span class="nav-icon">🔍</span>IOC Analyzer</a>
+    <a href="/qr_page" class="nav-link"><span class="nav-icon">📷</span>QR Scanner</a>
+    <a href="/history" class="nav-link"><span class="nav-icon">🕐</span>Scan History</a>
+    <a href="#" class="nav-link"><span class="nav-icon">🌐</span>Threat Intel</a>
+    <a href="#" class="nav-link"><span class="nav-icon">📄</span>Reports</a>
+    <a href="#" class="nav-link"><span class="nav-icon">🔔</span>Alerts<span class="nav-badge">3</span></a>
+    <a href="#" class="nav-link"><span class="nav-icon">⚙️</span>Settings</a>
+    <div style="padding:8px">
+        <div class="integrations-box">
+            <div class="int-title">Integrations</div>
+            <div class="int-item"><span class="int-name">🌐 VirusTotal</span><span class="int-pill">Connected</span></div>
+            <div class="int-item"><span class="int-name">🚨 AbuseIPDB</span><span class="int-pill">Connected</span></div>
+            <div class="int-item"><span class="int-name">👁️ AlienVault OTX</span><span class="int-pill">Connected</span></div>
+        </div>
+    </div>
+    <div class="upgrade-card">
+        <div class="up-title">⭐ Upgrade to Pro</div>
+        <div class="up-desc">Unlock advanced features and real-time protection alerts.</div>
+        <button class="up-btn">Upgrade Now</button>
+    </div>
+    <div class="sidebar-footer">© 2026 CyberShield · All rights reserved.</div>
+</aside>
+
+<!-- MAIN -->
+<div class="content">
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <span style="font-size:1.2rem;color:var(--text3);cursor:pointer">☰</span>
+        <div class="search-box">
+            <span style="color:var(--text3)">🔍</span>
+            <input type="text" id="search-input" placeholder="Search IOC (IP, Domain, URL, Hash)...">
+            <button class="search-go" onclick="doSearch()">→</button>
+        </div>
+        <div class="topbar-right">
+            <div class="live-badge"><div class="live-dot"></div>Live</div>
+            <div class="clock" id="clock">00:00:00</div>
+            <div class="tb-icon">🌙</div>
+            <div class="tb-icon">🔔<div class="notif-badge">5</div></div>
+            <div class="admin-btn">
+                <div class="admin-av">A</div>
+                <div><div class="admin-name">Admin</div><div class="admin-role">Security Analyst</div></div>
+                <span style="color:var(--text3);font-size:0.7rem;margin-left:4px">▾</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- PAGE -->
+    <div class="page">
+        <!-- WELCOME -->
+        <div class="page-welcome fu">
+            <div>
+                <div class="welcome-heading">Welcome back, Admin 👋</div>
+                <div class="welcome-sub">Monitor, Analyze & Stay Protected · <span id="date-display" style="color:var(--gold)"></span></div>
+            </div>
+            <div class="page-actions">
+                <a href="/analyze_page" class="btn-primary">🔍 Scan IOC</a>
+                <a href="/history" class="btn-outline">⬇ View Reports</a>
+            </div>
+        </div>
+
+        <!-- KPI ROW -->
+        <div class="kpi-grid">
+            <div class="kpi k-gold fu d1">
+                <div class="kpi-top"><div class="kpi-label">Total Scans</div><div class="kpi-ico">🔍</div></div>
+                <div class="kpi-value" id="k-total">0</div>
+                <div class="kpi-sub" style="color:var(--green)">↑ All time</div>
+                <div class="kpi-spark"><canvas id="sp1"></canvas></div>
+            </div>
+            <div class="kpi k-red fu d2">
+                <div class="kpi-top"><div class="kpi-label">High Risk Threats</div><div class="kpi-ico">☠️</div></div>
+                <div class="kpi-value" id="k-high">0</div>
+                <div class="kpi-sub" style="color:var(--red)">⚠ Critical</div>
+                <div class="kpi-spark"><canvas id="sp2"></canvas></div>
+            </div>
+            <div class="kpi k-violet fu d3">
+                <div class="kpi-top"><div class="kpi-label">Medium Risk</div><div class="kpi-ico">🛡️</div></div>
+                <div class="kpi-value" id="k-medium">0</div>
+                <div class="kpi-sub" style="color:var(--violet)">⚡ Suspicious</div>
+                <div class="kpi-spark"><canvas id="sp3"></canvas></div>
+            </div>
+            <div class="kpi k-green fu d4">
+                <div class="kpi-top"><div class="kpi-label">Low Risk / Safe</div><div class="kpi-ico">✅</div></div>
+                <div class="kpi-value" id="k-safe">0</div>
+                <div class="kpi-sub" style="color:var(--green)">✓ Clean IOCs</div>
+                <div class="kpi-spark"><canvas id="sp4"></canvas></div>
+            </div>
+            <div class="kpi k-rose fu d5">
+                <div class="kpi-top"><div class="kpi-label">Reports Generated</div><div class="kpi-ico">📄</div></div>
+                <div class="kpi-value" id="k-reports">0</div>
+                <div class="kpi-sub" style="color:var(--rose)">↑ Total</div>
+                <div class="kpi-spark"><canvas id="sp5"></canvas></div>
+            </div>
+        </div>
+
+        <!-- API CARDS -->
+        <div class="api-grid fu">
+            <div class="api-card">
+                <div class="api-head">
+                    <div class="api-logo" style="background:var(--gold3);border:1px solid rgba(245,200,66,0.15)">🌐</div>
+                    <div class="api-name">VirusTotal</div>
+                </div>
+                <div class="api-stats">
+                    <div><div class="api-slabel">Detections</div><div class="api-sval" style="color:var(--gold)" id="vt-det">—</div></div>
+                    <div><div class="api-slabel">Last Scan</div><div class="api-sval" style="color:var(--text2);font-size:.75rem" id="vt-date">—</div></div>
+                </div>
+                <button class="api-btn" style="background:var(--gold3);color:var(--gold);border:1px solid rgba(245,200,66,0.2)" onclick="location='/analyze_page'">View Details</button>
+            </div>
+            <div class="api-card">
+                <div class="api-head">
+                    <div class="api-logo" style="background:var(--violet3);border:1px solid rgba(155,109,255,0.15)">🚨</div>
+                    <div class="api-name">AbuseIPDB</div>
+                </div>
+                <div class="api-stats">
+                    <div><div class="api-slabel">Abuse Score</div><div class="api-sval" style="color:var(--violet)" id="ab-score">—</div></div>
+                    <div><div class="api-slabel">Total Reports</div><div class="api-sval" style="color:var(--text2)" id="ab-reports">—</div></div>
+                </div>
+                <button class="api-btn" style="background:var(--violet3);color:var(--violet);border:1px solid rgba(155,109,255,0.2)" onclick="location='/analyze_page'">View Details</button>
+            </div>
+            <div class="api-card">
+                <div class="api-head">
+                    <div class="api-logo" style="background:var(--green2);border:1px solid rgba(34,211,165,0.15)">👁️</div>
+                    <div class="api-name">AlienVault OTX</div>
+                </div>
+                <div class="api-stats">
+                    <div><div class="api-slabel">Pulses Matched</div><div class="api-sval" style="color:var(--green)" id="otx-pulses">—</div></div>
+                    <div><div class="api-slabel">Reputation</div><div class="api-sval" style="color:var(--text2);font-size:.75rem" id="otx-rep">—</div></div>
+                </div>
+                <button class="api-btn" style="background:var(--green2);color:var(--green);border:1px solid rgba(34,211,165,0.2)" onclick="location='/analyze_page'">View Details</button>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="g3">
+            <!-- GAUGE -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title"><div class="c-dot" style="background:var(--gold)"></div>Overall Risk Score</div>
+                </div>
+                <div class="gauge-wrap">
+                    <div class="gauge-rel">
+                        <canvas id="gauge-canvas" width="230" height="135"></canvas>
+                        <div class="gauge-center">
+                            <div class="gauge-num" id="gauge-num" style="color:var(--gold)">—</div>
+                            <div class="gauge-max">/100</div>
+                        </div>
+                    </div>
+                    <div id="gauge-verdict" class="gauge-verdict" style="background:var(--gold3);color:var(--gold);border:1px solid rgba(245,200,66,0.2)">Loading...</div>
+                    <div class="gauge-desc">Based on weighted analysis from<br>multiple threat intelligence sources</div>
+                </div>
+            </div>
+
+            <!-- TABLE -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title"><div class="c-dot" style="background:var(--violet)"></div>Latest Analysis Results</div>
+                    <a href="/history" class="card-link">View All →</a>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="data-table">
+                        <thead><tr><th>IOC / Indicator</th><th>Type</th><th>Score</th><th>Result</th><th>Time</th></tr></thead>
+                        <tbody id="results-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RIGHT COL -->
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-title"><div class="c-dot" style="background:var(--green)"></div>Recent Activity</div>
+                        <a href="/history" class="card-link">View All</a>
+                    </div>
+                    <div id="activity-feed"><div style="color:var(--text3);font-size:.75rem;text-align:center;padding:14px">Loading...</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:12px"><div class="c-dot" style="background:var(--rose)"></div>System Status</div>
+                    <div class="status-row"><span class="status-name">🌐 VirusTotal API</span><span class="status-ok">Operational</span></div>
+                    <div class="status-row"><span class="status-name">🚨 AbuseIPDB API</span><span class="status-ok">Operational</span></div>
+                    <div class="status-row"><span class="status-name">👁️ AlienVault OTX</span><span class="status-ok">Operational</span></div>
+                    <div class="status-row"><span class="status-name">🗄️ Database</span><span class="status-ok">Operational</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM GRID -->
+        <div class="g3b">
+            <!-- DONUT -->
+            <div class="card">
+                <div class="card-head"><div class="card-title"><div class="c-dot" style="background:var(--gold)"></div>IOC Type Distribution</div></div>
+                <div style="display:flex;align-items:center;gap:20px">
+                    <div class="donut-wrap">
+                        <canvas id="donut-canvas"></canvas>
+                        <div class="donut-center">
+                            <div class="donut-num" id="donut-total">0</div>
+                            <div class="donut-lbl">Total</div>
+                        </div>
+                    </div>
+                    <div class="legend" style="flex:1">
+                        <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:var(--gold)"></div>IP Address</div><div style="display:flex;gap:5px"><span class="legend-val" id="l-ip">0</span><span class="legend-pct" id="p-ip">(0%)</span></div></div>
+                        <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:var(--violet)"></div>Domain</div><div style="display:flex;gap:5px"><span class="legend-val" id="l-do">0</span><span class="legend-pct" id="p-do">(0%)</span></div></div>
+                        <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:var(--red)"></div>URL</div><div style="display:flex;gap:5px"><span class="legend-val" id="l-ur">0</span><span class="legend-pct" id="p-ur">(0%)</span></div></div>
+                        <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:var(--rose)"></div>File Hash</div><div style="display:flex;gap:5px"><span class="legend-val" id="l-ha">0</span><span class="legend-pct" id="p-ha">(0%)</span></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BAR CHART -->
+            <div class="card">
+                <div class="card-head"><div class="card-title"><div class="c-dot" style="background:var(--violet)"></div>Threat Level Distribution</div></div>
+                <canvas id="bar-canvas" height="160"></canvas>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="card">
+                <div class="card-title" style="margin-bottom:14px"><div class="c-dot" style="background:var(--rose)"></div>Quick Actions</div>
+                <a href="/analyze_page" class="qa-item"><div class="qa-icon">🔍</div><div><div class="qa-title">New IOC Scan</div><div class="qa-sub">Analyze IP, Domain, Hash or URL</div></div></a>
+                <a href="/qr_page" class="qa-item"><div class="qa-icon">📷</div><div><div class="qa-title">QR Code Scanner</div><div class="qa-sub">Scan and analyze QR codes</div></div></a>
+                <a href="/history" class="qa-item"><div class="qa-icon">📋</div><div><div class="qa-title">Threat History</div><div class="qa-sub">View all past analyses</div></div></a>
+                <a href="#" class="qa-item"><div class="qa-icon">📄</div><div><div class="qa-title">Generate Report</div><div class="qa-sub">Export threat analysis PDF</div></div></a>
+            </div>
+        </div>
+    </div>
+    <div class="page-footer">Crafted with ❤️ for a safer digital world · CyberShield CTI Platform 2026</div>
+</div>
+
+<script>
+// CLOCK
+function tick(){const n=new Date();document.getElementById('clock').textContent=n.toTimeString().slice(0,8);document.getElementById('date-display').textContent=n.toDateString();}
+setInterval(tick,1000);tick();
+
+// COUNT UP
+function countUp(id,v){const e=document.getElementById(id);if(!e)return;let n=0,s=Math.max(1,Math.ceil(v/40));const t=setInterval(()=>{n=Math.min(n+s,v);e.textContent=n;if(n>=v)clearInterval(t);},40);}
+
+// SPARKLINE
+function spark(id,data,color){const c=document.getElementById(id);if(!c)return;new Chart(c,{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:1.5,fill:true,backgroundColor:color.replace(')',',0.08)').replace('rgb','rgba'),pointRadius:0,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:{duration:1000}}});}
+
+// GAUGE
+function buildGauge(score){
+  const c=document.getElementById('gauge-canvas');if(!c)return;
+  const col=score>=71?'#ff6b6b':score>=31?'#f5c842':'#22d3a5';
+  new Chart(c,{type:'doughnut',data:{datasets:[{data:[score,100-score],backgroundColor:[col,'rgba(255,255,255,0.03)'],borderWidth:0,circumference:180,rotation:270}]},options:{responsive:false,cutout:'76%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:1500,easing:'easeInOutQuart'}}});
+  document.getElementById('gauge-num').textContent=score;
+  document.getElementById('gauge-num').style.color=col;
+  const v=document.getElementById('gauge-verdict');
+  if(score>=71){v.textContent='HIGH RISK';v.style.background='rgba(255,107,107,0.12)';v.style.color='#ff6b6b';v.style.border='1px solid rgba(255,107,107,0.25)';}
+  else if(score>=31){v.textContent='MEDIUM RISK';v.style.background='rgba(245,200,66,0.12)';v.style.color='#f5c842';v.style.border='1px solid rgba(245,200,66,0.25)';}
+  else{v.textContent='LOW RISK';v.style.background='rgba(34,211,165,0.12)';v.style.color='#22d3a5';v.style.border='1px solid rgba(34,211,165,0.25)';}
+}
+
+// SEARCH
+function doSearch(){const v=document.getElementById('search-input').value.trim();if(v){const f=document.createElement('form');f.method='POST';f.action='/analyze';const i=document.createElement('input');i.name='ioc';i.value=v;f.appendChild(i);document.body.appendChild(f);f.submit();}}
+document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+// LOAD DASHBOARD DATA
+fetch('/dashboard_data')
+  .then(r=>r.json())
+  .then(d=>{
+    countUp('k-total',d.total);countUp('k-high',d.high);countUp('k-medium',d.medium);countUp('k-safe',d.safe);countUp('k-reports',d.total);countUp('donut-total',d.total);
+    spark('sp1',[2,5,3,8,6,9,d.total||1],'rgb(245,200,66)');
+    spark('sp2',[1,2,1,3,2,3,d.high||0],'rgb(255,107,107)');
+    spark('sp3',[1,2,2,3,2,4,d.medium||0],'rgb(155,109,255)');
+    spark('sp4',[1,2,3,4,5,5,d.safe||0],'rgb(34,211,165)');
+    spark('sp5',[1,2,1,3,2,3,d.total||0],'rgb(244,114,182)');
+    const avg=d.total>0?Math.round((d.high*85+d.medium*50+d.safe*10)/d.total):0;
+    buildGauge(avg);
+    if(d.recent&&d.recent.length>0){
+      const l=d.recent[0];
+      document.getElementById('vt-det').textContent=l.score+'/100';
+      document.getElementById('vt-date').textContent=l.time?l.time.slice(0,10):'—';
+      document.getElementById('ab-score').textContent=l.score+'/100';
+      document.getElementById('ab-reports').textContent=d.total;
+      document.getElementById('otx-pulses').textContent=Math.floor(l.score/2);
+      document.getElementById('otx-rep').textContent=l.verdict.includes('HIGH')?'Malicious':l.verdict.includes('MEDIUM')?'Suspicious':'Clean';
+    }
+    // TABLE
+    const tb=document.getElementById('results-tbody');
+    if(!d.recent||!d.recent.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">No scans yet — run your first analysis!</td></tr>';}
+    else{tb.innerHTML=d.recent.map(r=>{
+      const col=r.verdict.includes('HIGH')?'#ff6b6b':r.verdict.includes('MEDIUM')?'#f5c842':'#22d3a5';
+      const bg=r.verdict.includes('HIGH')?'rgba(255,107,107,0.12)':r.verdict.includes('MEDIUM')?'rgba(245,200,66,0.12)':'rgba(34,211,165,0.12)';
+      const cls=r.verdict.includes('HIGH')?'p-high':r.verdict.includes('MEDIUM')?'p-med':'p-low';
+      const lbl=r.verdict.includes('HIGH')?'High Risk':r.verdict.includes('MEDIUM')?'Medium':'Safe';
+      const tc=r.type==='ip'?'#f5c842':r.type==='domain'?'#9b6dff':r.type==='url'?'#22d3a5':'#f472b6';
+      return`<tr><td class="td-ioc">${r.ioc}</td><td><span style="font-size:.65rem;padding:2px 8px;border-radius:8px;background:rgba(245,200,66,0.08);color:${tc};border:1px solid ${tc}40">${r.type.toUpperCase()}</span></td><td><span class="score-chip" style="background:${bg};color:${col}">${r.score}</span></td><td><span class="risk-pill ${cls}"><span class="rp-dot"></span>${lbl}</span></td><td style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.7rem">${r.time?r.time.slice(11,16):'—'}</td></tr>`;
+    }).join('');}
+    // ACTIVITY
+    const feed=document.getElementById('activity-feed');
+    if(!d.recent||!d.recent.length){feed.innerHTML='<div style="color:var(--text3);font-size:.75rem;text-align:center;padding:12px">No activity yet</div>';}
+    else{feed.innerHTML=d.recent.map((r,i)=>{
+      const col=r.verdict.includes('HIGH')?'var(--red)':r.verdict.includes('MEDIUM')?'var(--gold)':'var(--green)';
+      const title=r.verdict.includes('HIGH')?'High Risk Detected':r.verdict.includes('MEDIUM')?'Suspicious IOC Found':'Safe IOC Analyzed';
+      return`<div class="act" style="animation:fadeUp .4s ease ${i*.07}s forwards;opacity:0"><div class="act-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div><div style="flex:1"><div class="act-title">${title}</div><div class="act-ioc">${r.ioc}</div></div><div class="act-time">${r.time?r.time.slice(11,16):'—'}</div></div>`;
+    }).join('');}
+    // DONUT
+    const tot=d.total||1;
+    document.getElementById('l-ip').textContent=d.ip_count||0;document.getElementById('l-do').textContent=d.domain_count||0;document.getElementById('l-ur').textContent=d.url_count||0;document.getElementById('l-ha').textContent=d.hash_count||0;
+    document.getElementById('p-ip').textContent='('+Math.round((d.ip_count||0)/tot*100)+'%)';document.getElementById('p-do').textContent='('+Math.round((d.domain_count||0)/tot*100)+'%)';document.getElementById('p-ur').textContent='('+Math.round((d.url_count||0)/tot*100)+'%)';document.getElementById('p-ha').textContent='('+Math.round((d.hash_count||0)/tot*100)+'%)';
+    new Chart(document.getElementById('donut-canvas').getContext('2d'),{type:'doughnut',data:{datasets:[{data:[d.ip_count||0,d.domain_count||0,d.url_count||0,d.hash_count||0],backgroundColor:['rgba(245,200,66,.85)','rgba(155,109,255,.85)','rgba(255,107,107,.85)','rgba(244,114,182,.85)'],borderColor:['#f5c842','#9b6dff','#ff6b6b','#f472b6'],borderWidth:1.5,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#171428',borderColor:'rgba(245,200,66,.2)',borderWidth:1,titleColor:'#f0ecff',bodyColor:'#b8afd4'}},animation:{animateRotate:true,duration:1200}}});
+    new Chart(document.getElementById('bar-canvas').getContext('2d'),{type:'bar',data:{labels:['High Risk','Medium Risk','Safe'],datasets:[{data:[d.high||0,d.medium||0,d.safe||0],backgroundColor:['rgba(255,107,107,.7)','rgba(245,200,66,.7)','rgba(34,211,165,.7)'],borderColor:['#ff6b6b','#f5c842','#22d3a5'],borderWidth:1,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#171428',borderColor:'rgba(245,200,66,.2)',borderWidth:1,titleColor:'#f0ecff',bodyColor:'#b8afd4'}},scales:{x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#6b5f8a',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#6b5f8a',font:{size:11}},beginAtZero:true}},animation:{duration:1200}}});
+  })
+  .catch(()=>{
+    ['k-total','k-high','k-medium','k-safe','k-reports'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0';});
+    buildGauge(0);
+    spark('sp1',[1,2,3,4,5,6,7],'rgb(245,200,66)');spark('sp2',[1,1,2,1,2,2,3],'rgb(255,107,107)');spark('sp3',[1,2,1,3,2,3,4],'rgb(155,109,255)');spark('sp4',[1,2,3,4,5,6,7],'rgb(34,211,165)');spark('sp5',[1,2,1,3,2,4,5],'rgb(244,114,182)');
+  });
+</script>
+</body>
+</html>
