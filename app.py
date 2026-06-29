@@ -3,14 +3,16 @@ import requests
 import re
 import sqlite3
 import os
+from dotenv import load_dotenv
 from datetime import datetime
 from report import generate_report
+load_dotenv()
 
 app = Flask(__name__)
 
-VT_KEY    = "YOUR_VIRUSTOTAL_KEY_HERE"
-ABUSE_KEY = "YOUR_ABUSEIPDB_KEY_HERE"
-OTX_KEY   = "YOUR_OTX_KEY_HERE"
+VT_KEY = os.getenv("VT_KEY")
+ABUSE_KEY = os.getenv("ABUSE_KEY")
+OTX_KEY = os.getenv("OTX_KEY")
 
 def create_database():
     conn = sqlite3.connect("cti_database.db")
