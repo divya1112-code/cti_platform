@@ -8,9 +8,9 @@ from report import generate_report
 
 app = Flask(__name__)
 
-VT_KEY    = "e0086769d559b43f57facb6174f4412fbd0fc502a8eb4be7d71385ade4fd7a4f"
-ABUSE_KEY = "244ba6220f712425ab884832cf3c717fca35236878361fdc138d4f54c446e69f385a203c96358445"
-OTX_KEY   = "a8d74e2fbd56678ae9c0e91e8f660338091f30313132e130922c451a9f505307"
+VT_KEY    = "YOUR_VIRUSTOTAL_KEY_HERE"
+ABUSE_KEY = "YOUR_ABUSEIPDB_KEY_HERE"
+OTX_KEY   = "YOUR_OTX_KEY_HERE"
 
 def create_database():
     conn = sqlite3.connect("cti_database.db")
