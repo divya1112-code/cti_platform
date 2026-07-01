@@ -1,18 +1,31 @@
-from flask import Flask, render_template, request, send_file, jsonify
+from flask import Flask, render_template, request, send_file, jsonify, session, redirect, url_for
 import requests
 import re
 import sqlite3
 import os
-from dotenv import load_dotenv
 from datetime import datetime
 from report import generate_report
-load_dotenv()
+from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = "cybershield_secret_2026"
 
-VT_KEY = os.getenv("VT_KEY")
-ABUSE_KEY = os.getenv("ABUSE_KEY")
-OTX_KEY = os.getenv("OTX_KEY")
+VT_KEY    = "e0086769d559b43f57facb6174f4412fbd0fc502a8eb4be7d71385ade4fd7a4f"
+ABUSE_KEY = "244ba6220f712425ab884832cf3c717fca35236878361fdc138d4f54c446e69f385a203c96358445"
+OTX_KEY   = "a8d74e2fbd456678ae9c0e91e8f660338091f303132e1309422c451a9f505307"
+
+# ── LOGIN CREDENTIALS ──
+USERNAME = "admin"
+PASSWORD = "cybershield123"
+
+# ── LOGIN REQUIRED DECORATOR ──
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
 
 def create_database():
     conn = sqlite3.connect("cti_database.db")
@@ -56,6 +69,8 @@ def check_virustotal(ioc, ioc_type):
             return 0
         headers = {"x-apikey": VT_KEY}
         response = requests.get(url, headers=headers, timeout=10)
+        print("VT Status:", response.status_code)
+        print(response.text)
         data = response.json()
         stats = data.get("data", {}).get("attributes", {}).get("last_analysis_stats", {})
         malicious = stats.get("malicious", 0)
@@ -70,6 +85,8 @@ def check_abuseipdb(ip):
         headers = {"Key": ABUSE_KEY, "Accept": "application/json"}
         params = {"ipAddress": ip, "maxAgeInDays": 90}
         response = requests.get(url, headers=headers, params=params, timeout=10)
+        print("AbuseIPDB Status:", response.status_code)
+        print(response.text)
         data = response.json()
         return data.get("data", {}).get("abuseConfidenceScore", 0)
     except:
@@ -85,6 +102,8 @@ def check_otx(ioc, ioc_type):
             return 0
         headers = {"X-OTX-API-KEY": OTX_KEY}
         response = requests.get(url, headers=headers, timeout=10)
+        print("OTX Status:", response.status_code)
+        print(response.text)
         data = response.json()
         pulse_info = data.get("pulse_info", {})
         pulse_count = pulse_info.get("count", 0)
@@ -92,19 +111,42 @@ def check_otx(ioc, ioc_type):
     except:
         return 0
 
+# ── ROUTES ──
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        if request.form["username"] == USERNAME and request.form["password"] == PASSWORD:
+            session["logged_in"] = True
+            session["username"] = request.form["username"]
+            return redirect(url_for("index"))
+        else:
+            error = "Invalid username or password"
+    return render_template("login.html", error=error)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
 @app.route("/analyze_page")
+@login_required
 def analyze_page():
     return render_template("analyze.html")
 
 @app.route("/qr_page")
+@login_required
 def qr_page():
     return render_template("qr.html")
 
 @app.route("/analyze", methods=["POST"])
+@login_required
 def analyze():
     ioc = request.form["ioc"]
     ioc_type = detect_ioc_type(ioc)
@@ -141,6 +183,7 @@ def analyze():
         verdict=verdict, color=color)
 
 @app.route("/history")
+@login_required
 def history():
     conn = sqlite3.connect("cti_database.db")
     cursor = conn.cursor()
@@ -150,6 +193,7 @@ def history():
     return render_template("history.html", rows=rows)
 
 @app.route("/download_report", methods=["POST"])
+@login_required
 def download_report():
     ioc         = request.form["ioc"]
     ioc_type    = request.form["ioc_type"]
@@ -162,6 +206,7 @@ def download_report():
     return send_file(filename, as_attachment=True)
 
 @app.route("/scan_qr", methods=["POST"])
+@login_required
 def scan_qr():
     from qr_scanner import scan_qr_code
     if "qr_image" not in request.files:
@@ -171,12 +216,10 @@ def scan_qr():
     filepath = os.path.join("uploads", file.filename)
     file.save(filepath)
     qr_data = scan_qr_code(filepath)
-    if qr_data:
-        return render_template("qr_result.html", ioc=qr_data)
-    else:
-        return render_template("qr_result.html", ioc=None)
+    return render_template("qr_result.html", ioc=qr_data)
 
 @app.route("/dashboard_data")
+@login_required
 def dashboard_data():
     conn = sqlite3.connect("cti_database.db")
     cursor = conn.cursor()
@@ -207,6 +250,7 @@ def dashboard_data():
     })
 
 @app.route("/stats")
+@login_required
 def stats():
     conn = sqlite3.connect("cti_database.db")
     cursor = conn.cursor()
