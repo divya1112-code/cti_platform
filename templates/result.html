@@ -110,7 +110,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;backgroun
             <div><div class="ih-lbl">Analyzed Indicator of Compromise</div><div class="ih-val">{{ ioc }}</div></div>
             <div style="text-align:right">
                 <div style="font-size:0.62rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">IOC Type</div>
-                {% if ioc_type=="ip" %}<span class="ibadge ib-ip">IP Address</span>
+                {% if ioc_type== "ip" %}<span class="ibadge ib-ip">IP Address</span>
                 {% elif ioc_type=="domain" %}<span class="ibadge ib-do">Domain</span>
                 {% elif ioc_type=="hash" %}<span class="ibadge ib-ha">File Hash</span>
                 {% else %}<span class="ibadge ib-ur">URL</span>{% endif %}
@@ -124,8 +124,8 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;backgroun
                     <div class="srow"><div class="srh"><span class="sn">🚨 AbuseIPDB</span><span class="sv" style="color:var(--violet)">{{ abuse_score }}/100</span></div><div class="strack"><div class="sfill sf-v" style="--p:{{ abuse_score }}%"></div></div></div>
                     <div class="srow"><div class="srh"><span class="sn">👁️ AlienVault OTX</span><span class="sv" style="color:var(--rose)">{{ otx_score }}/100</span></div><div class="strack"><div class="sfill sf-r" style="--p:{{ otx_score }}%"></div></div></div>
                     <div class="fbox"><div class="flbl">Scoring Formula</div>
-                    {% if ioc_type=="ip" %}<div class="ftext">(VT×0.4) + (Abuse×0.3) + (OTX×0.3) = {{ final_score }}</div>
-                    {% else %}<div class="ftext">(VT×0.6) + (OTX×0.4) = {{ final_score }}</div>{% endif %}</div>
+                    {% if ioc_type=="ip" %}<div class="ftext">(VT×0.5) + (Abuse×0.3) + (OTX×0.2) = {{final_score }}</div>
+                    {% else %}<div class="ftext">(VT×0.8) + (OTX×0.2) = {{ final_score }}</div>{% endif %}</div>
                 </div>
                 <div class="card"><div class="ct"><div class="ctd" style="background:var(--violet)"></div>Threat Radar</div><canvas id="rc" height="220"></canvas></div>
             </div>

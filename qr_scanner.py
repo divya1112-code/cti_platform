@@ -6,9 +6,16 @@ def scan_qr_code(image_path):
         img = Image.open(image_path)
         decoded = decode(img)
         if decoded:
-            qr_data = decoded[0].data.decode("utf-8")
-            return qr_data
-        else:
-            return None
+            return decoded[0].data.decode("utf-8")
+        img = img.convert("RGB")
+        decoded = decode(img)
+        if decoded:
+            return decoded[0].data.decode("utf-8")
+        img = img.convert("L")
+        decoded = decode(img)
+        if decoded:
+            return decoded[0].data.decode("utf-8")
+        return None
     except Exception as e:
+        print(f"QR Error: {e}")
         return None
